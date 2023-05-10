@@ -7,18 +7,18 @@ import Typography from '@mui/material/Typography';
 
 
 
-const PublishedPointCard = ({ id, description, price, state, pointName, pointBank }) => {
+const PublishedPointCard = ({ id,data, setSelected, openModal }) => {
   const colorHandler = () => {
-    if (state === "draft") {
+    if (data.publicationState === "draft") {
       return "grey";
     }
-    if (state === "published"){
-        return "green";
+    if (data.publicationState === "published") {
+      return "green";
     }
-    if(state==="sold"){
+    if (data.publicationState === "sold") {
       return "red";
     }
-    else{
+    else {
       return "yellow";
     }
   }
@@ -29,23 +29,31 @@ const PublishedPointCard = ({ id, description, price, state, pointName, pointBan
           Ultra rata point
         </Typography>
         <Typography sx={{ mb: 1.5 }} color="text.secondary">
-          $ {price} CLP
+          $ {data.price} CLP
         </Typography>
         <Typography variant="body2">
-          {description}
+          {data.description}
         </Typography>
         <Typography sx={{ mt: 2.5 }} color="text.secondary">
-          {pointName}
+          {data.pointName}
         </Typography>
         <Typography sx={{ mb: 0.5 }} color="text.secondary">
-          {pointBank}
+          {data.pointBank}
         </Typography>
       </CardContent>
       <CardActions>
-        <Button size="small">Learn More</Button>
+        <Button
+          onClick={() => {
+            setSelected(data);
+            openModal(true);
+          }}
+          size="small">Más detalles</Button>
       </CardActions>
     </Card>
   );
 }
 
 export default PublishedPointCard;
+
+
+

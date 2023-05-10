@@ -1,27 +1,94 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Autocomplete, Box, Button, Modal, Stack, Typography } from '@mui/material';
 import TextField from '@mui/material/TextField';
+import { useGet } from "../hooks/useGet";
+import httpGet from "../functions/httpGet";
 
 
 const FormModal = ({
     Open,
     Close,
+    selected,
 }) => {
 
-    const banks = [
-        { label: "banco1" },
-        { label: "banco2" }
-    ];
+    const [totalPoints, setTotalPoints] = useState(null);
+    const [price, setPrice] = useState(null);
+    const [selectedBank, setSelectedBank] = useState({ label: "", id: null });
+    const [selectedPointType, setSelectedPointType] = useState(null);
+    const [bank, setBank] = useState([]);
+    const [points, setPoints] = useState([]);
+    const [newPoint, setNewPoint]= useState(null);
+    const { data, loading } = useGet("/banks");
 
-    const [totalPoints, setTotalPoints] = useState(0);
-    const [price, setPrice] = useState(0);
-    const [selectedBank, setSelectedBank] = useState(0);
-    const [selectedPointType, setSelectedPointType] = useState(0);
-
-    const submitData = async () => {
-
+    const fetch = async (value) => {
+        const response = await httpGet(`/pointType/${value || selectedBank.id}`);
+        const temp = response.map((value) => ({
+            label: value.pointName,
+            id: value.idPointType
+        }));
+        setPoints([...temp]);
     }
 
+   
+
+    const createOrUpdate = async (isDraft) => {
+        if (totalPoints != 0 && price > 0 && selectedBank.id != null && selectedPointType != null) {
+            //POST
+            let body =
+            {
+                //"id":"7",
+                "description": points,
+                "price": price,
+                "publicationState": isDraft ? 1 : 0,
+                "publishedDate": "",
+                "user": "2",
+                "pointType": {
+                    //"idPointType": selectedPointType.id,
+                   // "pointName": selectedPointType.label,
+                    "bank": {
+                        "id": selectedBank.id,
+                        "bankName": selectedBank.bankName
+                    }
+                }
+            }
+            if(selected!=null){
+                body.id=selected.id;
+            }
+            if(newPoint==null){
+                body.pointType.idPointType=selectedPointType.idPointType;
+                body.pointType.pointName=selectedPointType.pointName
+            }
+            if(newPoint!=null){
+                body.pointType.pointName=newPoint
+            }
+            console.log('este es body ', body);
+        }
+    }
+
+
+    useEffect(() => {
+        if (Open) {
+            const temp = data.map((value) => ({
+                label: value.bankName,
+                id: value.id
+            }));
+            setBank([...temp]);
+        }
+    }, [Open]);
+
+    useEffect(() => {
+        if (selected != null) {
+            setTotalPoints(selected.description);
+            setPrice(selected.price);
+            setSelectedPointType(selected.pointType);
+            setSelectedBank(selected.pointType.bank);
+            fetch(selected.pointType.bank.id)
+        }
+        if (selectedBank?.id != null) {
+            fetch()
+        }
+
+    }, [selectedBank, selected]);
 
 
     return (
@@ -41,44 +108,63 @@ const FormModal = ({
                                 onChange={(event) => { setTotalPoints(event.target.value) }}
                                 id="outlined-basic"
                                 label="Cantidad de puntos"
-                                variant="outlined" />
+                                variant="outlined"
+                                defaultValue={totalPoints}
+                            />
                             <TextField
                                 onChange={(event) => { setPrice(event.target.value) }}
                                 id="outlined-basic"
                                 label="Precio"
-                                variant="outlined" />
-                            <Autocomplete
-                                disablePortal
-                                id="combo-box"
-                                options={banks}
-                                onChange={(event, value) => { console.log('auto ', value) }}
-                                renderInput={(params) => <TextField {...params} label="Banco" />}
+                                variant="outlined"
+                                defaultValue={price}
                             />
                             <Autocomplete
                                 disablePortal
                                 id="combo-box"
-                                onChange={(event, value) => { console.log('auto ', value) }}
-                                options={banks}
+                                options={bank}
+                                value={selectedBank}
+                                isOptionEqualToValue={(option, value)=>option.id===value.id}
+                                getOptionLabel={(option) => option.bankName}
+                                onChange={(_event, value) => { value != null && setSelectedBank(value);}}
+                                renderInput={(params) => <TextField {...params} label="Banco"
+                                /> 
+                            }
+                            />
+                            <Autocomplete
+                                disablePortal
+                                id="combo-box"
+                                value={selectedPointType}
+                                isOptionEqualToValue={(option, value)=>option.id===value.id}
+                                getOptionLabel={(option) => option.pointName}
+                                onChange={(event, value) => { value != null && setSelectedPointType(value) }}
+                                options={points}
                                 renderInput={(params) => <TextField {...params} label="Puntos" />}
                             />
+                           
                         </Stack>
                     </div>
+
+                    <p>No existe tu punto en este banco. Crealo acá</p>
+
                     <div style={{ marginTop: 20 }}>
                         <Stack spacing={2}>
+                            <TextField
+                                onChange={(event) => { setNewPoint(event.target.value) }}
+                                id="outlined-basic"
+                                label="Nombre del punto"
+                                variant="outlined"
+                                defaultValue={price}
+                            />
 
                             <Button variant="contained"
-                                onClick={() => { }}
+                                onClick={async () => { createOrUpdate(true) }}
                                 color="success"
-                            >Crear publicación</Button>
+                            >{selected != null ? 'Editar y guardar' : 'Crear'} publicación</Button>
 
                             <Button variant="contained"
                                 onClick={() => { }}
                                 color="secondary"
                             >Guardar para más tarde</Button>
-
-                            <Button variant="contained"
-                                onClick={() => { }}
-                            >Crear nuevo tipo de punto</Button>
                         </Stack>
                     </div>
                 </Box>
