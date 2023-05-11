@@ -23,7 +23,7 @@ const PublishedPointCard = ({ id,data, setSelected, openModal }) => {
     }
   }
   return (
-    <Card sx={{ minWidth: 100, background: colorHandler }}>
+    <Card sx={{ width: 300, background: colorHandler }}>
       <CardContent>
         <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
           Ultra rata point
@@ -38,7 +38,7 @@ const PublishedPointCard = ({ id,data, setSelected, openModal }) => {
           {data.pointName}
         </Typography>
         <Typography sx={{ mb: 0.5 }} color="text.secondary">
-          {data.pointBank}
+          {data.pointType.pointName}
         </Typography>
       </CardContent>
       <CardActions>
@@ -47,7 +47,9 @@ const PublishedPointCard = ({ id,data, setSelected, openModal }) => {
             setSelected(data);
             openModal(true);
           }}
-          size="small">Más detalles</Button>
+          size="small"
+          style={{color:"white"}}
+          >Más detalles</Button>
       </CardActions>
     </Card>
   );

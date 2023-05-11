@@ -26,3 +26,22 @@
   justify-content: center;
 }
 
+.filter-container {
+  margin: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.filter-container > div {
+  width: calc(33% - 10px);
+  margin-right: 10px;
+}
+
+.filter-container > div:last-child {
+  margin-right: 0;
+}
+
+.filter-container > button {
+  margin-right: 10px;
+}
+

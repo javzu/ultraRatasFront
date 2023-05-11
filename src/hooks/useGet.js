@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export function useGet(url) {
+export function useGet(url, reload) {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -29,7 +29,8 @@ export function useGet(url) {
         }
         fetchData();
         return ()=>isMounted=false;
-    }, [url]);
+
+    }, [url, reload]);
 
     return { data, loading, error }
 
